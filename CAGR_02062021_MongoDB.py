@@ -35,6 +35,7 @@ from bson.raw_bson import RawBSONDocument
 from bson.codec_options import CodecOptions
 from pymongo import MongoClient
 from datetime import datetime
+import pandas as pd
 
 global absDirName
 absDirName = os.path.dirname(os.path.abspath(__file__))
@@ -190,6 +191,8 @@ if __name__ == "__main__":
         df_cagr_per=DataFrame (lst_cagr_percentage,columns=['REG','NAME','INDUSTRY_TYPE','YEAR','CAGR'])
         df_cagr_per.head()
 
+       
+        
         #dataa = data_cagr_root.merge(df, on=[ 'REG','NAME','INDUSTRY_TYPE','YEAR'])
         
 
@@ -197,6 +200,8 @@ if __name__ == "__main__":
         df_stats = df_cagr_final.describe()
 
         df1 =df_stats.values.tolist()
+
+        
         #df_cagr_final=dataa['CAGR']
 
         #df_stats=df_cagr_final.describe()
@@ -218,7 +223,7 @@ if __name__ == "__main__":
 
         stage_5_table = dgsafe['top_ind_cagr_com']
 
-        print("START INSERT DATA INTO COLLECTION" )
+        print("START INSERT DATA INTO COLLECTION")
         
         stage_5_table.insert_many(industry_top_com_dict)
 
@@ -253,9 +258,9 @@ if __name__ == "__main__":
         black =  df['Iservice_category']=='Need_more_analysis'
 
         df2=df.Iservice.describe()
-
+          
         df3=df2.values.tolist()
-
+        
         one =df[(df.Iservice>= df3[3]) & (df.Iservice <= df3[4])].count()[0]
         two = df[(df.Iservice  > df3[4]) & (df.Iservice <= df3[5])].count()[0]
         three =df[(df.Iservice > df3[5]) & (df.Iservice <= df3[6])].count()[0]
@@ -263,12 +268,16 @@ if __name__ == "__main__":
         weights = [one,two,three,four]
         label = ['Need more analysis','Moderate','Reasonable performance','Better returns']
 
+        #print(green_report[['REG','NAME','YEAR','INDUSTRY_TYPE','CAGR','Iservice_category']].head(5))
+
         green_report=df[green]
+        amber_report=df[amber]
+        red_report=df[red]
+        black_report=df[black]
+    
+        result =green_report.append([amber_report,red_report,black_report])
 
-        print(green_report[['REG','NAME','YEAR','INDUSTRY_TYPE','CAGR','Iservice_category']].head(5))
-
-        dataa_dict = green_report.to_dict('records')
-
+        dataa_dict = result.to_dict('records')
         stage_5_table = dgsafe['final_cagr_scores']
 
         print("START INSERT DATA INTO COLLECTION" )
@@ -302,7 +311,6 @@ if __name__ == "__main__":
         # stage_7_table = dgsafe['all_scores_final']
 
         # stage_7_table.insert_many(all_scores_final_dict)
-
 
 
 
