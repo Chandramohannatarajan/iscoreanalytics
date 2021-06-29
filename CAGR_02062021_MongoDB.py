@@ -116,16 +116,19 @@ if __name__ == "__main__":
         # queryData = list(data_from_db)
         if len(data_from_db) == 0:
                 continue
-
         data_cagr_root = pd.DataFrame.from_dict(data_from_db)
         print("pass")
         data_cagr = data_cagr_root[['REG','NAME','INDUSTRY_TYPE','RETAINED_PROFITS','YEAR']]
+        data_cagr = data_cagr.sort_values(by="YEAR",ascending=True)
+        data_cagr = data_cagr[data_cagr['YEAR'] != 2021]
         data_cagr.head()
         list_dataframes = []
         for k, v in data_cagr.groupby('NAME'):
             if v.shape[0] >= 3:
                 list_dataframes.append(v)
-        #list_dataframes= [v for k, v in data_cagr.groupby('COMPANY_NAME')]
+        
+        #list_dataframes= [v for k, v in data_cagr.groupby('NAME')]
+        #print(list_dataframes)
         print("dataframe list ",len(list_dataframes))
         if len(list_dataframes) == 0:
             continue
@@ -135,63 +138,39 @@ if __name__ == "__main__":
         for i in list_dataframes:
             r=i.values.tolist()
             list_df.append(r)
-        #print(lst_df) 
+        #print(list_df) 
 
         lst_cagr = []
         lst_cagr_percentage = []
         try:
             for u in list_df:
-                for k in range(len(u)-1):
-                    #print("k: ",k)
-                    #print(len(u))
-                    #print(u)
-                    Initial_year=(u[0][-1])
-                    Final_year=u[1][-1]
-                    print("Final_year :", Final_year)
-                    print("Initial_year : ",Initial_year)
-                    if Final_year==Initial_year:
-                        pass
-                    else:
+                try:
+                    for k in range(len(u)-1):
+                        Initial_year=(u[0][-1])
+                        print(Initial_year)
+                        Final_year=u[1][-1]
                         reg_num=(u[0][0])
-                        #print(reg_num)
                         com_name=(u[0][1])
-                        #print(com_name)
                         ind_type=(u[0][2])
-                        #print(ind_type)
                         expo =(1/(int(Final_year)-int(Initial_year)))
-                        #print("expo: ",expo)
                         Final_RP=u[1][-2]
-                        #print("Final_RP :",Final_RP)
                         Initial_RP=u[0][-2]
-                        #print("Initial_RP :",Initial_RP)
-                        if Initial_RP==0:
-                            Initial_RP=1
-                        else:
-                            part=(Final_RP/Initial_RP)
-                            print("part : ",part)
-                            cagr = (part)**(expo) -1
-                            q = (cagr.real, cagr.imag)
-                            A = cagr.real
-                            B = cagr.imag
-                            t = ("{:.0%}".format(A))
-                            #print("cagr : ",A)
-                            #print("cagr in %: ",t)
-                            #print(" ")
-                            u.pop(1)
-                            lst_cagr.append([reg_num,com_name,ind_type,int(Final_year),A])
-                            lst_cagr_percentage.append([reg_num,com_name,ind_type,int(Final_year),t])
-        #break
-        except IndexError:
-            pass
-       
+                        part=(Final_RP/Initial_RP)
+                        cagr = (part)**(expo) -1
+                        q = (cagr.real, cagr.imag)
+                        A = cagr.real
+                        B = cagr.imag
+                        t = ("{:.0%}".format(A))
+                        u.pop(1)
+                        lst_cagr.append([reg_num,com_name,ind_type,int(Final_year),A])
+                except:
+                    pass
         except ZeroDivisionError:
             pass
         
         df = DataFrame (lst_cagr,columns=['REG','NAME','INDUSTRY_TYPE','YEAR','CAGR'])
         df_cagr_per=DataFrame (lst_cagr_percentage,columns=['REG','NAME','INDUSTRY_TYPE','YEAR','CAGR'])
         df_cagr_per.head()
-
-       
         
         #dataa = data_cagr_root.merge(df, on=[ 'REG','NAME','INDUSTRY_TYPE','YEAR'])
         
@@ -221,7 +200,7 @@ if __name__ == "__main__":
 
         industry_top_com_dict = top_20_companies.to_dict('records')
 
-        stage_5_table = dgsafe['top_ind_cagr_com']
+        stage_5_table = dgsafe['final_top_cagr']
 
         print("START INSERT DATA INTO COLLECTION")
         
