@@ -89,7 +89,7 @@ if __name__ == "__main__":
     #root_file_path = os_any_dir_search('all_industries_more_scores.csv')[1]
     start = datetime.now()
     currentyear = datetime.today().year
-    mainCollection = dgsafe.get_collection("zscore_root_file_fin", codec_options=codec_options)
+    mainCollection = dgsafe.get_collection("z_score_root_file", codec_options=codec_options)
     uniqueIndustryList = list(mainCollection.distinct("INDUSTRY_TYPE"))
     for industry in uniqueIndustryList:
         print("industry " ,industry)
@@ -138,7 +138,8 @@ if __name__ == "__main__":
         # In[10]:
 
 
-            data_from_db = list(mainCollection.find({"YEAR" : str(year),"INDUSTRY_TYPE": industry},{"_id":0}))
+            #data_from_db = list(mainCollection.find({"YEAR" : str(year),"INDUSTRY_TYPE": industry},{"_id":0}))
+            data_from_db = list(mainCollection.find({"REG" : "00002404"},{"_id":0}))
             # queryData = list(data_from_db)
             if len(data_from_db) == 0:
                   continue
@@ -177,13 +178,13 @@ if __name__ == "__main__":
 
 
             # In[12]:
-            data["total_Assts"] = ((data["TANGIBLE_ASSETS"] + data["INTANGIBLE_ASSETS"]))
+            #data["total_Assts"] = ((data["TANGIBLE_ASSETS"] + data["INTANGIBLE_ASSETS"]))
             data["EBITDA"]=((data["INTEREST_PAYMENTS"] +data["PRETAX_PROFITS"]+data["DEPRECIATION"]))
-            data["Z1"]=(1.2*(data["WORKING_CAPITAL"]/data["total_Assts"]))
-            data["Z2"]=(1.4*(data["RETAINED_PROFITS"]/data["total_Assts"]))
-            data["Z3"]=(3.3*(data["EBITDA"]/data["total_Assts"]))
+            data["Z1"]=(1.2*(data["WORKING_CAPITAL"]/data["TOTAL_ASSETS"]))
+            data["Z2"]=(1.4*(data["RETAINED_PROFITS"]/data["TOTAL_ASSETS"]))
+            data["Z3"]=(3.3*(data["EBITDA"]/data["TOTAL_ASSETS"]))
             data["Z4"]=(.6*(data["SHAREHOLDER_FUNDS"]/data["TOTAL_LIAB"]))
-            data["Z5"]=(.99*(data["TURNOVER"]/data["total_Assts"]))
+            data["Z5"]=(.99*(data["TURNOVER"]/data["TOTAL_ASSETS"]))
             data["Z"]=(data["Z1"]+data["Z2"]+data["Z3"]+data["Z4"]+data["Z5"])
 
 
@@ -219,14 +220,14 @@ if __name__ == "__main__":
             # In[16]:
 
 
-            data_dict=data.to_dict('records')
+            data_dict = data.to_dict('records')
 
-            
+            #print(data_dict)
             # In[17]:
 
 
             #creating a collection 2
-            stage_2_table=dgsafe['root_file_added_scores_new']
+            stage_2_table=dgsafe['final_z_scores']
 
 
             # In[18]:
@@ -234,6 +235,7 @@ if __name__ == "__main__":
             print("start")
             #Send Dataframe from python to MongoDB
             stage_2_table.insert_many(data_dict)
+            #quit()
 
     print("complete")
     quit()
