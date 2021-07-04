@@ -112,6 +112,8 @@ if __name__ == "__main__":
     for industry in uniqueIndustryList:
         print("industry " ,industry)
 
+        #05507387 00002065 04967001
+        #data_from_db = list(mainCollection.find({"REG": "04967001"},{"_id":0}))
         data_from_db = list(mainCollection.find({"INDUSTRY_TYPE": industry},{"_id":0}))
         # queryData = list(data_from_db)
         if len(data_from_db) == 0:
@@ -120,14 +122,17 @@ if __name__ == "__main__":
         print("pass")
         data_cagr = data_cagr_root[['REG','NAME','INDUSTRY_TYPE','RETAINED_PROFITS','YEAR']]
         data_cagr = data_cagr.sort_values(by="YEAR",ascending=True)
+        data_cagr["YEAR"] = data_cagr["YEAR"].astype(str).astype(int)
         data_cagr = data_cagr[data_cagr['YEAR'] != 2021]
+        data_cagr["RETAINED_PROFITS"] = data_cagr["RETAINED_PROFITS"].astype(float).astype(int)
         data_cagr.head()
-        list_dataframes = []
-        for k, v in data_cagr.groupby('NAME'):
-            if v.shape[0] >= 3:
-                list_dataframes.append(v)
+
+        # list_dataframes = []
+        # for k, v in data_cagr.groupby('NAME'):
+        #     if v.shape[0] >= 3:
+        #         list_dataframes.append(v)
         
-        #list_dataframes= [v for k, v in data_cagr.groupby('NAME')]
+        list_dataframes = [v for k, v in data_cagr.groupby('NAME')]
         #print(list_dataframes)
         print("dataframe list ",len(list_dataframes))
         if len(list_dataframes) == 0:
@@ -135,52 +140,89 @@ if __name__ == "__main__":
         
 
         list_df=[]
+        list_neg = []
         for i in list_dataframes:
-            r=i.values.tolist()
-            list_df.append(r)
-        #print(list_df) 
-
+            r = i.values.tolist()
+            for n in r:
+                if n[3] < 0:
+                    list_neg.append(n)
+            
+            #this con for all value have negative retained profit
+            neg_value_len = len(list_neg)
+            all_value_len = len(r)
+            if neg_value_len ==  all_value_len:
+                    list_df.append(list_neg)
+            try:
+                while r[0][-2]<0:
+                    if len(r)>0:
+                        r.pop(0)
+                list_df.append(r)
+            except:
+                pass
+        #print("len ",len(list_df))
         lst_cagr = []
         lst_cagr_percentage = []
         try:
             for u in list_df:
+                #if len(u)>1:
                 try:
                     for k in range(len(u)-1):
-                        Initial_year=(u[0][-1])
-                        print(Initial_year)
-                        Final_year=u[1][-1]
-                        reg_num=(u[0][0])
-                        com_name=(u[0][1])
-                        ind_type=(u[0][2])
-                        expo =(1/(int(Final_year)-int(Initial_year)))
-                        Final_RP=u[1][-2]
                         Initial_RP=u[0][-2]
-                        part=(Final_RP/Initial_RP)
-                        cagr = (part)**(expo) -1
-                        q = (cagr.real, cagr.imag)
-                        A = cagr.real
-                        B = cagr.imag
-                        t = ("{:.0%}".format(A))
+                        #print("Initial_RP :",Initial_RP)
+                        Final_RP=u[1][-2]
+                        #print("Final_RP :",Final_RP)
+                        Initial_year=(u[0][-1])
+                        #print("Initial_year : ",Initial_year)
+                        Final_year=u[1][-1]
+                        #print("Final_year :", Final_year)
+                        reg_num=(u[0][0])
+                        ind_type=(u[0][2])
+                        com_name=(u[0][1])
+                        # print("****** 1 ****",(u[1][-2]))
+                        # print("****** 2 ****",(u[0][-2]))
+                        # print("****** 3 ****",(u[1][-1]-u[0][-1]))
+                        if (u[1][-2]) < 0  and (u[0][-2]) < 0:
+                            print("print both negative")
+                            CAGR = 0
+                        else:
+                            CAGR = pow((u[1][-2])/(u[0][-2]),(1/(u[1][-1]-u[0][-1])))-1
+                        
+                        CAGR = CAGR.real
+                        #q = (CAGR.real, CAGR.imag)
+                        #CAGR = CAGR.real
+                        #print("CAGR :",CAGR)
+                        #print(" ")
                         u.pop(1)
-                        lst_cagr.append([reg_num,com_name,ind_type,int(Final_year),A])
+                        lst_cagr.append([reg_num,com_name,ind_type,Final_year,CAGR])
+                
                 except:
                     pass
         except ZeroDivisionError:
             pass
         
         df = DataFrame (lst_cagr,columns=['REG','NAME','INDUSTRY_TYPE','YEAR','CAGR'])
-        df_cagr_per=DataFrame (lst_cagr_percentage,columns=['REG','NAME','INDUSTRY_TYPE','YEAR','CAGR'])
-        df_cagr_per.head()
+        
+        df.head()
+
+        df['CAGR'] = pd.concat([df['CAGR'].apply(lambda x: x.real), df['CAGR'].apply(lambda x: x.imag)], axis=1, keys=('R','X'))
+        
+        #df_cagr_per=DataFrame (lst_cagr_percentage,columns=['REG','NAME','INDUSTRY_TYPE','YEAR','CAGR'])
+        #df_cagr_per.head()
         
         #dataa = data_cagr_root.merge(df, on=[ 'REG','NAME','INDUSTRY_TYPE','YEAR'])
-        
+        df.head()
 
+        df['CAGR'] = df['CAGR'].fillna(0)
+        
         df_cagr_final= df['CAGR']
         df_stats = df_cagr_final.describe()
 
         df1 =df_stats.values.tolist()
 
         
+        cagr_2020 = df.loc[df['YEAR'] == 2020]
+        
+        cagr_2020.dtypes
         #df_cagr_final=dataa['CAGR']
 
         #df_stats=df_cagr_final.describe()
@@ -191,7 +233,8 @@ if __name__ == "__main__":
         # df_stats.rename(columns = {"Unnamed: 0" : "Stats"}, inplace = True)
         # df_stats
 
-        CAGR_mark = df.groupby(['REG','NAME','INDUSTRY_TYPE','YEAR'], as_index=False)
+        CAGR_mark = cagr_2020.groupby(['REG','NAME','INDUSTRY_TYPE','YEAR'], as_index=False)
+
         average_cagr = CAGR_mark.agg({'CAGR':'mean'})
         top_20_companies = average_cagr.sort_values('CAGR', ascending=False).head(20)
         print("TOP_20_COMPANIES")
@@ -206,46 +249,64 @@ if __name__ == "__main__":
         
         stage_5_table.insert_many(industry_top_com_dict)
 
+        list_dataframes_cagr = [v for k, v in df.groupby('NAME')]
+
+        list_df_cagr=[]
+        for i in list_dataframes:
+            r=i.values.tolist()
+            list_df_cagr.append(r)
+        
+        list_df_cagr[0]
+
+        list_df_cagr[0][0][4]
+        
         conditions2_at = [
+                (df['CAGR']==0),  
                 (df['CAGR']>df1[3])&(df['CAGR'] <= df1[4]),
                 (df['CAGR']>df1[4])&(df['CAGR'] <= df1[5]),
                 (df['CAGR']>df1[5])&(df['CAGR'] <= df1[6]),
                 (df['CAGR']>df1[6])&(df['CAGR'] <= df1[7]),   
                 ]
-        values2_at = ['1', '2', '3', '4']
-        df['Iservice'] = np.select(conditions2_at, values2_at)
-        df['Iservice'] = model.fit_transform(df['Iservice'].astype('float'))
+        values2_at = [0,1, 2, 3, 4]
+        df['Istar_CAGR'] = np.select(conditions2_at, values2_at)
+        
+        #df['Iservice'] = np.select(conditions2_at, values2_at)
+        #df['Iservice'] = model.fit_transform(df['Iservice'].astype('float'))
         conditions3_at = [
-                ( df['Iservice']==1),
-                ( df['Iservice']==2),
-                ( df['Iservice']==3),
-                ( df['Iservice']==4),
+                (df['Istar_CAGR']==0)&(df['YEAR']==list_df_cagr[0][0][4]),
+                (df['Istar_CAGR']==0),
+                (df['Istar_CAGR']==1),
+                (df['Istar_CAGR']==2),
+                (df['Istar_CAGR']==3),
+                (df['Istar_CAGR']==4),
                 ]
-        values3_at = ['Need_more_analysis','Moderate','Reasonable_performance','Better_returns']
-        df['Iservice_category'] = np.select(conditions3_at, values3_at)
-
+        values3_at = ['Startup','Negative_growth','Need_more_analysis','Moderate','Reasonable_performance','Better_returns']
+        df['Istar_CAGR_rating'] = np.select(conditions3_at, values3_at) 
+        
         one =df[(df.CAGR>= df1[3]) & (df.CAGR <= df1[4])].count()[0]
         two = df[(df.CAGR  > df1[4]) & (df.CAGR <= df1[5])].count()[0]
         three =df[(df.CAGR > df1[5]) & (df.CAGR <= df1[6])].count()[0]
         four = df[(df.CAGR > df1[6]) & (df.CAGR <= df1[7])].count()[0]
         weights = [one,two,three,four]
-        label = ['Need more analysis','Moderate','Reasonable performance','Better returns']
+        label = ['Startup','Negative_growth','Need more analysis','Moderate','Reasonable performance','Better returns']
 
-        green =  df['Iservice_category']=='Better_returns'
-        amber = df['Iservice_category']=='Reasonable_performance'
-        red =  df['Iservice_category']=='Moderate'
-        black =  df['Iservice_category']=='Need_more_analysis'
-
-        df2=df.Iservice.describe()
-          
-        df3=df2.values.tolist()
+        darkGreen = df['Istar_CAGR_rating'] == 'Startup'
+        darkRed = df['Istar_CAGR_rating'] == 'Negative_growth'
+        green =  df['Istar_CAGR_rating'] == 'Better_returns'
+        amber = df['Istar_CAGR_rating'] == 'Reasonable_performance'
+        red =  df['Istar_CAGR_rating'] == 'Moderate'
+        black = df['Istar_CAGR_rating'] == 'Need_more_analysis'
         
-        one =df[(df.Iservice>= df3[3]) & (df.Iservice <= df3[4])].count()[0]
-        two = df[(df.Iservice  > df3[4]) & (df.Iservice <= df3[5])].count()[0]
-        three =df[(df.Iservice > df3[5]) & (df.Iservice <= df3[6])].count()[0]
-        four = df[(df.Iservice > df3[6]) & (df.Iservice <= df3[7])].count()[0]
-        weights = [one,two,three,four]
-        label = ['Need more analysis','Moderate','Reasonable performance','Better returns']
+        # df2=df.Iservice.describe()
+          
+        # df3=df2.values.tolist()
+        
+        # one =df[(df.Iservice>= df3[3]) & (df.Iservice <= df3[4])].count()[0]
+        # two = df[(df.Iservice  > df3[4]) & (df.Iservice <= df3[5])].count()[0]
+        # three =df[(df.Iservice > df3[5]) & (df.Iservice <= df3[6])].count()[0]
+        # four = df[(df.Iservice > df3[6]) & (df.Iservice <= df3[7])].count()[0]
+        # weights = [one,two,three,four]
+        # label = ['Need more analysis','Moderate','Reasonable performance','Better returns']
 
         #print(green_report[['REG','NAME','YEAR','INDUSTRY_TYPE','CAGR','Iservice_category']].head(5))
 
@@ -253,9 +314,11 @@ if __name__ == "__main__":
         amber_report=df[amber]
         red_report=df[red]
         black_report=df[black]
+        darkRed_report=df[darkRed]
+        darkGreen_report=df[darkGreen]
     
-        result =green_report.append([amber_report,red_report,black_report])
-
+        result =green_report.append([amber_report,red_report,black_report,darkRed_report,darkGreen_report])
+        #print(result)
         dataa_dict = result.to_dict('records')
         stage_5_table = dgsafe['final_cagr_scores']
 
