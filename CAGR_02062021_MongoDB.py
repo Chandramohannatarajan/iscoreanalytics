@@ -113,7 +113,7 @@ if __name__ == "__main__":
         print("industry " ,industry)
 
         #05507387 00002065 04967001
-        #data_from_db = list(mainCollection.find({"REG": "04967001"},{"_id":0}))
+        #data_from_db = list(mainCollection.find({"REG": {"$in" :  ["05507387","00002065","04967001"]}},{"_id":0}))
         data_from_db = list(mainCollection.find({"INDUSTRY_TYPE": industry},{"_id":0}))
         # queryData = list(data_from_db)
         if len(data_from_db) == 0:
@@ -138,10 +138,12 @@ if __name__ == "__main__":
         if len(list_dataframes) == 0:
             continue
         
-
+        
         list_df=[]
         list_neg = []
         for i in list_dataframes:
+            all_value_len = 0
+            neg_value_len = 0
             r = i.values.tolist()
             for n in r:
                 if n[3] < 0:
@@ -149,9 +151,13 @@ if __name__ == "__main__":
             
             #this con for all value have negative retained profit
             neg_value_len = len(list_neg)
+            print("neg value len ",neg_value_len)
             all_value_len = len(r)
+            print("all value len ",all_value_len)
             if neg_value_len ==  all_value_len:
+                    print("***** IN EQUAL CON *******")
                     list_df.append(list_neg)
+            list_neg = []
             try:
                 while r[0][-2]<0:
                     if len(r)>0:
@@ -165,6 +171,7 @@ if __name__ == "__main__":
         try:
             for u in list_df:
                 #if len(u)>1:
+                CAGR = 0
                 try:
                     for k in range(len(u)-1):
                         Initial_RP=u[0][-2]
@@ -185,7 +192,9 @@ if __name__ == "__main__":
                             print("print both negative")
                             CAGR = 0
                         else:
+                            #print("both not Negative Condition")
                             CAGR = pow((u[1][-2])/(u[0][-2]),(1/(u[1][-1]-u[0][-1])))-1
+
                         
                         CAGR = CAGR.real
                         #q = (CAGR.real, CAGR.imag)
@@ -212,7 +221,7 @@ if __name__ == "__main__":
         #dataa = data_cagr_root.merge(df, on=[ 'REG','NAME','INDUSTRY_TYPE','YEAR'])
         df.head()
 
-        df['CAGR'] = df['CAGR'].fillna(0)
+        #df['CAGR'] = df['CAGR'].fillna(0)
         
         df_cagr_final= df['CAGR']
         df_stats = df_cagr_final.describe()
