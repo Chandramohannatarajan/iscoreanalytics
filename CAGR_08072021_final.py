@@ -114,8 +114,8 @@ if __name__ == "__main__":
 
         #05507387 00002065 04967001 financial and insurance activities
         #data_from_db = list(mainCollection.find({"INDUSTRY_TYPE": "financial and insurance activities"},{"_id":0}))
-        data_from_db = list(mainCollection.find({"REG": {"$in" :  ["00002404"]}},{"_id":0}))
-        #data_from_db = list(mainCollection.find({"INDUSTRY_TYPE": industry},{"_id":0}))
+        #data_from_db = list(mainCollection.find({"REG": {"$in" :  ["00002065"]}},{"_id":0}))
+        data_from_db = list(mainCollection.find({"INDUSTRY_TYPE": industry},{"_id":0}))
         # queryData = list(data_from_db)
 
         if len(data_from_db) == 0:
@@ -145,37 +145,37 @@ if __name__ == "__main__":
         except:
             pass
 
-        conditions0_at = [
-            (data['INDUSTRY_TYPE'] == 'professional, scientific and technical activities'),
-            (data['INDUSTRY_TYPE'] == 'transportation and storage'),
-            (data['INDUSTRY_TYPE'] == 'financial and insurance activities'),
-            (data['INDUSTRY_TYPE'] == 'manufacturing'),
-            (data['INDUSTRY_TYPE'] == 'other service activities'),
-            (data['INDUSTRY_TYPE'] == 'real estate activities'),
-            (data['INDUSTRY_TYPE'] == 'wholesale and retail trade; repair of motor vehicles and motorcycles'),
-            (data['INDUSTRY_TYPE'] == 'administrative and support service activities'),
-            (data['INDUSTRY_TYPE'] == 'education'),
-            (data['INDUSTRY_TYPE'] == 'mining and quarrying'),
-            (data['INDUSTRY_TYPE'] == 'arts, entertainment and recreation'),
-            (data['INDUSTRY_TYPE'] == 'agriculture forestry and fishing'),
-            (data['INDUSTRY_TYPE'] == 'information and communication'),
-            (data['INDUSTRY_TYPE'] == 'construction'),
-            (data['INDUSTRY_TYPE'] == 'human health and social work activities'),
-            (data['INDUSTRY_TYPE'] == 'accommodation and food service activities'),
-            (data['INDUSTRY_TYPE'] == 'activities of extraterritorial organisations and bodies'),
-            (data['INDUSTRY_TYPE'] == 'water supply, sewerage, waste management and remediation activities'),
-            (data['INDUSTRY_TYPE'] == 'public administration and defence; compulsory social security'),
-            (data['INDUSTRY_TYPE'] == 'electricity, gas, steam and air conditioning supply'),
-            (data['INDUSTRY_TYPE'] == 'activities of households as employers; undifferentiated goods- and services-producing activities of households for own use'),
-            (data['INDUSTRY_TYPE'] == 'misc'),
-            ]
+        # conditions0_at = [
+        #     (data['INDUSTRY_TYPE'] == 'professional, scientific and technical activities'),
+        #     (data['INDUSTRY_TYPE'] == 'transportation and storage'),
+        #     (data['INDUSTRY_TYPE'] == 'financial and insurance activities'),
+        #     (data['INDUSTRY_TYPE'] == 'manufacturing'),
+        #     (data['INDUSTRY_TYPE'] == 'other service activities'),
+        #     (data['INDUSTRY_TYPE'] == 'real estate activities'),
+        #     (data['INDUSTRY_TYPE'] == 'wholesale and retail trade; repair of motor vehicles and motorcycles'),
+        #     (data['INDUSTRY_TYPE'] == 'administrative and support service activities'),
+        #     (data['INDUSTRY_TYPE'] == 'education'),
+        #     (data['INDUSTRY_TYPE'] == 'mining and quarrying'),
+        #     (data['INDUSTRY_TYPE'] == 'arts, entertainment and recreation'),
+        #     (data['INDUSTRY_TYPE'] == 'agriculture forestry and fishing'),
+        #     (data['INDUSTRY_TYPE'] == 'information and communication'),
+        #     (data['INDUSTRY_TYPE'] == 'construction'),
+        #     (data['INDUSTRY_TYPE'] == 'human health and social work activities'),
+        #     (data['INDUSTRY_TYPE'] == 'accommodation and food service activities'),
+        #     (data['INDUSTRY_TYPE'] == 'activities of extraterritorial organisations and bodies'),
+        #     (data['INDUSTRY_TYPE'] == 'water supply, sewerage, waste management and remediation activities'),
+        #     (data['INDUSTRY_TYPE'] == 'public administration and defence; compulsory social security'),
+        #     (data['INDUSTRY_TYPE'] == 'electricity, gas, steam and air conditioning supply'),
+        #     (data['INDUSTRY_TYPE'] == 'activities of households as employers; undifferentiated goods- and services-producing activities of households for own use'),
+        #     (data['INDUSTRY_TYPE'] == 'misc'),
+        #     ]
         
-        values0_at = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22']
-        data['INDUSTRY_CODE'] = np.select(conditions0_at, values0_at)
+        # values0_at = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22']
+        # data['INDUSTRY_CODE'] = np.select(conditions0_at, values0_at)
 
         data_cagr = data[['REG','NAME','INDUSTRY_TYPE','RETAINED_PROFITS','YEAR']]
 
-        #data_cagr["YEAR"] = data_cagr["YEAR"].astype(str).astype(int)
+        data_cagr["YEAR"] = data_cagr["YEAR"].astype(str).astype(int)
         #data = data[data['YEAR'] != 2021]
         #data_cagr["RETAINED_PROFITS"] = data_cagr["RETAINED_PROFITS"].astype(float).astype(int)
         data.head()
@@ -199,7 +199,7 @@ if __name__ == "__main__":
             #print(r[0][1])
             try:
                 print("Error Value ",r[0][-2])
-                while int(r[0][-2])<0:
+                while r[0][-2]<0:
                     if len(r)>0:
                         r.pop(0)
                 #print(r)
@@ -209,7 +209,7 @@ if __name__ == "__main__":
                 pass
 
         print("len ",len(list_df))
-        print(list_df)
+        #print(list_df)
 
         lst_cagr = []
         lst_cagr_percentage = []
@@ -222,9 +222,9 @@ if __name__ == "__main__":
                         print("Initial_RP :",Initial_RP)
                         Final_RP = int(u[1][-2])
                         print("Final_RP :",Final_RP)
-                        Initial_year = int(u[0][-1])
+                        Initial_year = u[0][-1]
                         print("Initial_year : ",Initial_year)
-                        Final_year = int(u[1][-1])
+                        Final_year = u[1][-1]
                         print("Final_year :", Final_year)
                         reg_num = (u[0][0])
                         ind_type = (u[0][2])
@@ -239,7 +239,7 @@ if __name__ == "__main__":
                         #     #print("both not Negative Condition")
                         #     CAGR = pow((u[1][-2])/(u[0][-2]),(1/(u[1][-1]-u[0][-1])))-1
 
-                        CAGR=pow((u[1][-2])/(u[0][-2]),(1/(u[1][-1]-u[0][-1])))-1
+                        CAGR = pow((u[1][-2])/(u[0][-2]),(1/(int(u[1][-1])-int(u[0][-1]))))-1
                         #CAGR = CAGR.real
                         #q = (CAGR.real, CAGR.imag)
                         #CAGR = CAGR.real
@@ -412,17 +412,17 @@ if __name__ == "__main__":
         root_cagr = pd.merge(root_data_cagr,df, on=['REG','NAME','INDUSTRY_TYPE','YEAR','RETAINED_PROFITS','CAGR'],how ="outer")
 
         root_cagr.shape
-        print(root_cagr)
+        #print(root_cagr)
         iscores = root_cagr.to_dict('records')
 
-        #stage_5_table = dgsafe['final_cagr_scores_test_fin']
+        stage_5_table = dgsafe['final_cagr_scores']
 
         print("START INSERT DATA INTO COLLECTION" )
         
         
-        #stage_5_table.insert_many(iscores)
+        stage_5_table.insert_many(iscores)
         
-        quit()              
+        #quit()              
         # df_stats = df.describe()
 
         # df_stats.rename(columns = {"Unnamed: 0" : "Stats"}, inplace = True)
