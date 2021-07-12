@@ -219,13 +219,13 @@ if __name__ == "__main__":
                 try:
                     for k in range(len(u)-1):
                         Initial_RP = int(u[0][-2])
-                        print("Initial_RP :",Initial_RP)
+                        #print("Initial_RP :",Initial_RP)
                         Final_RP = int(u[1][-2])
-                        print("Final_RP :",Final_RP)
+                        #print("Final_RP :",Final_RP)
                         Initial_year = u[0][-1]
-                        print("Initial_year : ",Initial_year)
+                        #print("Initial_year : ",Initial_year)
                         Final_year = u[1][-1]
-                        print("Final_year :", Final_year)
+                        #print("Final_year :", Final_year)
                         reg_num = (u[0][0])
                         ind_type = (u[0][2])
                         com_name = (u[0][1])
@@ -243,7 +243,7 @@ if __name__ == "__main__":
                         #CAGR = CAGR.real
                         #q = (CAGR.real, CAGR.imag)
                         #CAGR = CAGR.real
-                        print("CAGR :",CAGR)
+                        #print("CAGR :",CAGR)
                         #print(" ")
                         u.pop(1)
                         lst_cagr.append([reg_num,com_name,ind_type,Final_year,CAGR])
@@ -421,7 +421,9 @@ if __name__ == "__main__":
         
         
         stage_5_table.insert_many(iscores)
-        
+
+        print("complete ind")
+    print("complete")   
         #quit()              
         # df_stats = df.describe()
 
