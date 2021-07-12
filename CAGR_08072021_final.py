@@ -178,14 +178,14 @@ if __name__ == "__main__":
         data_cagr["YEAR"] = data_cagr["YEAR"].astype(str).astype(int)
         #data = data[data['YEAR'] != 2021]
         #data_cagr["RETAINED_PROFITS"] = data_cagr["RETAINED_PROFITS"].astype(float).astype(int)
-        data.head()
+        #data.head()
 
         # list_dataframes = []
         # for k, v in data.groupby('NAME'):
         #     if v.shape[0] >= 3:
         #         list_dataframes.append(v)
         
-        list_dataframes = [v for k, v in data.groupby('NAME')]
+        list_dataframes = [v for k, v in data_cagr.groupby('NAME')]
         #print(list_dataframes)
         print("dataframe list ",len(list_dataframes))
         if len(list_dataframes) == 0:
@@ -198,7 +198,7 @@ if __name__ == "__main__":
             r=i.values.tolist()
             #print(r[0][1])
             try:
-                print("Error Value ",r[0][-2])
+                #print("Error Value ",r[0][-2])
                 while r[0][-2]<0:
                     if len(r)>0:
                         r.pop(0)
