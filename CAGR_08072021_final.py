@@ -145,6 +145,8 @@ if __name__ == "__main__":
         except:
             pass
 
+        data["YEAR"] = data["YEAR"].astype(str).astype(int)
+
         # conditions0_at = [
         #     (data['INDUSTRY_TYPE'] == 'professional, scientific and technical activities'),
         #     (data['INDUSTRY_TYPE'] == 'transportation and storage'),
