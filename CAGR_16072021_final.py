@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# In[ ]:
+
+
+#!/usr/bin/env python
+# coding: utf-8
+
 # LOADING PYTHON MODULES
 
 # In[1]:
@@ -114,8 +120,8 @@ if __name__ == "__main__":
 
         #05507387 00002065 04967001 financial and insurance activities
         #data_from_db = list(mainCollection.find({"INDUSTRY_TYPE": "financial and insurance activities"},{"_id":0}))
-        data_from_db = list(mainCollection.find({"REG": {"$in" :  ["00002065"]}},{"_id":0}))
-        #data_from_db = list(mainCollection.find({"INDUSTRY_TYPE": industry},{"_id":0}))
+        #data_from_db = list(mainCollection.find({"REG": {"$in" :  ["00002065"]}},{"_id":0}))
+        data_from_db = list(mainCollection.find({"INDUSTRY_TYPE": industry},{"_id":0}))
         # queryData = list(data_from_db)
 
         if len(data_from_db) == 0:
@@ -144,8 +150,6 @@ if __name__ == "__main__":
             data['SIC07'].fillna('unknown', inplace=True)
         except:
             pass
-        
-        data["YEAR"] = data["YEAR"].astype(str).astype(int)
 
         data["YEAR"] = data["YEAR"].astype(str).astype(int)
 
@@ -185,8 +189,8 @@ if __name__ == "__main__":
         #data.head()
 
         # list_dataframes = []
-        # for k, v in data_cagr.groupby('NAME'):
-        #     if v.shape[0] > 1:
+        # for k, v in data.groupby('NAME'):
+        #     if v.shape[0] >= 3:
         #         list_dataframes.append(v)
         
         list_dataframes = [v for k, v in data_cagr.groupby('NAME')]
@@ -277,146 +281,128 @@ if __name__ == "__main__":
         root_data_cagr['CAGR'] = root_data_cagr['CAGR'].fillna(0)
 
         cagr_rating = root_data_cagr[['REG','NAME','INDUSTRY_TYPE','RETAINED_PROFITS','YEAR','CAGR']]
-
-        df_cagr_col=cagr_rating['CAGR']
-        df_stats=df_cagr_col.describe()
-        df1 =df_stats.values.tolist()
         
-        # cagr_2020 = df.loc[df['YEAR'] == 2020]
+        #CAGR CALCULATION INDUSTRYWISE
         
-        # cagr_2020.dtypes
-        # #df_cagr_final=dataa['CAGR']
-
-        # #df_stats=df_cagr_final.describe()
-        # #df_stats
-
-        # #df.stats=df_stats.values.tolist
-
-        # # df_stats.rename(columns = {"Unnamed: 0" : "Stats"}, inplace = True)
-        # # df_stats
-
-        # CAGR_mark = cagr_2020.groupby(['REG','NAME','INDUSTRY_TYPE','YEAR'], as_index=False)
-
-        # average_cagr = CAGR_mark.agg({'CAGR':'mean'})
-        # top_20_companies = average_cagr.sort_values('CAGR', ascending=False).head(20)
-        # print("TOP_20_COMPANIES")
-        # print(" ")
-        # print(top_20_companies)
-
-        # industry_top_com_dict = top_20_companies.to_dict('records')
-
-        # #stage_5_table = dgsafe['final_top_cagr']
-
-        # print("START INSERT DATA INTO COLLECTION")
-        
-        # #stage_5_table.insert_many(industry_top_com_dict)
-        cagr_rating_dataframes = [v for k, v in cagr_rating.groupby('NAME')]
-        #list_dataframes_cagr = [v for k, v in df.groupby('NAME')]
-
-        for i in cagr_rating_dataframes:
+        ind_count=[]
+        df = pd.DataFrame(columns=['REG','NAME','INDUSTRY_TYPE','RETAINED_PROFITS','YEAR','CAGR','Istar_CAGR','Istar_CAGR_rating'])    
+        df_all_typez=cagr_rating["INDUSTRY_TYPE"].unique().tolist()
+        for l,value_type in enumerate(df_all_typez):
+            ind_type =  cagr_rating['INDUSTRY_TYPE']==str(value_type)
+            cagr_indwise = cagr_rating[ind_type]
+            cagr_rating_ind=cagr_indwise[['REG','NAME','INDUSTRY_TYPE','RETAINED_PROFITS','YEAR','CAGR']]
+            ind_count.append([str(value_type),cagr_rating_ind.shape])
+            df2_cagr_col=cagr_rating_ind['CAGR']
+            df2_stats=df2_cagr_col.describe()
+            df2 =df2_stats.values.tolist()
+            cagr_rating_ind_dataframes= [v for k, v in cagr_rating_ind.groupby('NAME')]
+            for i in cagr_rating_ind_dataframes:
             #print(i)
-            conditions2_at = [
-                    (i['CAGR']==0),   
-                    (i['CAGR']>=df1[3])&(i['CAGR'] <= df1[4]),
-                    (i['CAGR']>df1[4])&(i['CAGR'] <= df1[5]),
-                    (i['CAGR']>df1[5])&(i['CAGR'] <= df1[6]),
-                    (i['CAGR']>df1[6])&(i['CAGR'] <= df1[7]),   
+                conditions2_at = [
+                                (i['CAGR']==0),   
+                                (i['CAGR']>=df2[3])&(i['CAGR'] <= df2[4]),
+                                (i['CAGR']>df2[4])&(i['CAGR'] <= df2[5]),
+                                (i['CAGR']>df2[5])&(i['CAGR'] <= df2[6]),
+                                (i['CAGR']>df2[6])&(i['CAGR'] <= df2[7]),   
                     ]
-            values2_at = [0,1, 2, 3, 4]
-            i['Istar_CAGR'] = np.select(conditions2_at, values2_at)
-            #print(i)
-        
-        for i in cagr_rating_dataframes:
-            list_all2=[]
-            list_ideal2=[]
-            #print(i)
-            l=i.values.tolist()
-            list_all2.append(l)
-            #print("list_all2: ",list_all2)
-            #print("list_all2_year: ",list_all2[0][0][-3])
-            #break
-            #print(" ")
-            r=i.values.tolist()
-            #print("length of r: ",len(r))
-            #print(" ")
-            #break
-        
-            try:
-                while r[0][-4]<0:
-                    #print("Negative RP: ",r[0][-4])
-                    #print("length of r: ",len(r))
-                    if len(r)>0:
-                    #if r[0][-2]<0:
-                        #print(r[0])
-                        #print(" ")
-                    #print("length of r_initial: ",len(r))
-                        r.pop(0)
-                    #print("length of r_through: ",len(r))
-                    #print(" ")
-                        #print(len(r))
-                        #print(r)
-                        #print(" ")
-                list_ideal2.append(r)
-                #print("ideal2_2: ",list_ideal2)
-                #print("list_ideal2_year: ",list_ideal2[0][0][-3])
+                values2_at = [0,1, 2, 3, 4]
+                i['Istar_CAGR'] = np.select(conditions2_at, values2_at)
+            for i in cagr_rating_ind_dataframes: 
+                list_all3=[]
+                list_ideal3=[]
+                #print(i)
+                l=i.values.tolist()
+                list_all3.append(l)
+                #print("list_all2: ",list_all2)
+                #print("list_all2_year: ",list_all2[0][0][-3])
+                #break
                 #print(" ")
-            except:
-                pass
+                r=i.values.tolist()
+                #print("length of r: ",len(r))
+                #print(" ")
+                #break
+    
+                try:
+                    while r[0][-4]<0:
+                        #print("Negative RP: ",r[0][-4])
+                        #print("length of r: ",len(r))
+                        if len(r)>0:
+                        #if r[0][-2]<0:
+                            #print(r[0])
+                            #print(" ")
+                        #print("length of r_initial: ",len(r))
+                            r.pop(0)
+                        #print("length of r_through: ",len(r))
+                        #print(" ")
+                            #print(len(r))
+                            #print(r)
+                            #print(" ")
+                    list_ideal3.append(r)
+                    #print("ideal2_2: ",list_ideal2)
+                    #print("list_ideal2_year: ",list_ideal2[0][0][-3])
+                    #print(" ")
+                except:
+                    pass
+                #break
+            #print("list_all: ",list_all) 
+            #print(" ")
+            #print("list_ideal: ",list_ideal)
+                if (i['Istar_CAGR'][::].sum())==(i['CAGR'][::].sum()):
+                    try:
+                        conditions5_at = [
+                                        (i['Istar_CAGR'][::].sum())==(i['CAGR'][::].sum()),
+                                        ((i['Istar_CAGR']==0)&(i['YEAR']==list_all3[0][0][-3])),
+                                        (i['Istar_CAGR']==0),
+                                        (i['Istar_CAGR']==1),
+                                        (i['Istar_CAGR']==2),
+                                        (i['Istar_CAGR']==3),
+                                        (i['Istar_CAGR']==4),
+                                        ]
+                        #values3_at = ['Caution','Startup','Negative_growth','Need_more_analysis','Moderate','Reasonable_performance','Better_returns']
+                        values5_at = ['Under_Lens','Bud','Under_Radar','Under_Observation,','Joining_League','Runner','Dynamic']
+                        i['Istar_CAGR_rating'] = np.select(conditions5_at, values5_at)
+                    except IndexError:
+                        pass
+                else:
+                    try:
+                        conditions6_at = [
+                                        ((i['Istar_CAGR']==0)&(i['YEAR']==list_all3[0][0][-3])),
+                                        (i['Istar_CAGR']==0)&(i['YEAR']==list_ideal3[0][0][-3]),
+                                        (i['Istar_CAGR']==0),
+                                        (i['Istar_CAGR']==1),
+                                        (i['Istar_CAGR']==2),
+                                        (i['Istar_CAGR']==3),
+                                        (i['Istar_CAGR']==4),
+                                        ]
+                        #values3_at = ['Startup','Gearing_up','Negative_growth','Need_more_analysis','Moderate','Reasonable_performance','Better_returns']
+                        values6_at = ['Bud','Gearing_up','Under_Radar','Under_Observation','Joining_League','Runner','Dynamic']
+
+                        i['Istar_CAGR_rating'] = np.select(conditions6_at, values6_at)
+                    except IndexError:
+                        pass
+                #try:
+                    #conditions4_at = [
+                                    #((cagr_rating['Istar_CAGR']==0)&(cagr_rating['YEAR']==list_ideal1[0][0][-2])),
+                                    #]
+                    #values4_at = ['Gearing_up']
+                    #cagr_rating['Istar_CAGR_rating'] = np.select(conditions4_at, values4_at)
+         
+                #except IndexError:
+                    #pass
+            lst_df2_final=[]
+            for i in cagr_rating_ind_dataframes:
+                t=i.values.tolist()
+                lst_df2_final.append(t)
+            lst_df2_all=[]
+            for i in lst_df2_final:
+                for j in i:
+                    lst_df2_all.append(j)
+            df_ind = DataFrame (lst_df2_all,columns=['REG','NAME','INDUSTRY_TYPE','RETAINED_PROFITS','YEAR','CAGR','Istar_CAGR','Istar_CAGR_rating'])
+            df = pd.merge(df, df_ind, how='outer')
             #break
-        #print("list_all: ",list_all) 
-        #print(" ")
-        #print("list_ideal: ",list_ideal)
+        root_ind_cagr=pd.merge(root_data_cagr,df, on=['REG','NAME','INDUSTRY_TYPE','YEAR','RETAINED_PROFITS','CAGR'],how ="outer")
 
-            if (i['Istar_CAGR'][::].sum())==(i['CAGR'][::].sum()):
-                try:
-                    conditions3_at = [
-                                    (i['Istar_CAGR'][::].sum())==(i['CAGR'][::].sum()),
-                                    ((i['Istar_CAGR']==0)&(i['YEAR']==list_all2[0][0][-3])),
-                                    (i['Istar_CAGR']==0),
-                                    (i['Istar_CAGR']==1),
-                                    (i['Istar_CAGR']==2),
-                                    (i['Istar_CAGR']==3),
-                                    (i['Istar_CAGR']==4),
-                                    ]
-                    #values3_at = ['Caution','Startup','Negative_growth','Need_more_analysis','Moderate','Reasonable_performance','Better_returns']
-                    values3_at = ['Under_Lens','Bud','Under_Radar','Under_Observation,','Joining_League','Runner','Dynamic']
-                    i['Istar_CAGR_rating'] = np.select(conditions3_at, values3_at)
-                except IndexError:
-                    pass
-            else:
-                try:
-                    conditions3_at = [
-                                    ((i['Istar_CAGR']==0)&(i['YEAR']==list_all2[0][0][-3])),
-                                    (i['Istar_CAGR']==0)&(i['YEAR']==list_ideal2[0][0][-3]),
-                                    (i['Istar_CAGR']==0),
-                                    (i['Istar_CAGR']==1),
-                                    (i['Istar_CAGR']==2),
-                                    (i['Istar_CAGR']==3),
-                                    (i['Istar_CAGR']==4),
-                                    ]
-                    #values3_at = ['Startup','Gearing_up','Negative_growth','Need_more_analysis','Moderate','Reasonable_performance','Better_returns']
-                    values3_at = ['Bud','Gearing_up','Under_Radar','Under_Observation','Joining_League','Runner','Dynamic']
-
-                    i['Istar_CAGR_rating'] = np.select(conditions3_at, values3_at)
-                except IndexError:
-                    pass
-        
-        lst_df_final=[]
-        for i in cagr_rating_dataframes:
-            t=i.values.tolist()
-            lst_df_final.append(t)
-        lst_df_all=[]
-        for i in lst_df_final:
-            for j in i:
-                lst_df_all.append(j)
-
-
-        df = DataFrame(lst_df_all,columns=['REG','NAME','INDUSTRY_TYPE','RETAINED_PROFITS','YEAR','CAGR','Istar_CAGR','Istar_CAGR_rating'])
-
-        root_cagr = pd.merge(root_data_cagr,df, on=['REG','NAME','INDUSTRY_TYPE','YEAR','RETAINED_PROFITS','CAGR'],how ="outer")
-
-        root_cagr.shape
-        print(root_cagr)
+        #print(root_cagr)
         iscores = root_cagr.to_dict('records')
 
         stage_5_table = dgsafe['final_cagr_scores']
@@ -424,11 +410,11 @@ if __name__ == "__main__":
         print("START INSERT DATA INTO COLLECTION" )
         
         
-        #stage_5_table.insert_many(iscores)
+        stage_5_table.insert_many(iscores)
 
         print("complete ind")
-    #print("complete")   
-        quit()              
+    print("complete")   
+        #quit()              
         # df_stats = df.describe()
 
         # df_stats.rename(columns = {"Unnamed: 0" : "Stats"}, inplace = True)
@@ -455,10 +441,4 @@ if __name__ == "__main__":
         # stage_7_table = dgsafe['all_scores_final']
 
         # stage_7_table.insert_many(all_scores_final_dict)
-
-
-
-
-
-
 
