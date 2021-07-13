@@ -138,8 +138,8 @@ if __name__ == "__main__":
         # In[10]:
 
 
-            #data_from_db = list(mainCollection.find({"YEAR" : str(year),"INDUSTRY_TYPE": industry},{"_id":0}))
-            data_from_db = list(mainCollection.find({"REG" : "00002404"},{"_id":0}))
+            data_from_db = list(mainCollection.find({"YEAR" : str(year),"INDUSTRY_TYPE": industry},{"_id":0}))
+            #data_from_db = list(mainCollection.find({"REG" : "00002404"},{"_id":0}))
             # queryData = list(data_from_db)
             if len(data_from_db) == 0:
                   continue

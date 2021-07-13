@@ -114,8 +114,8 @@ if __name__ == "__main__":
 
         #05507387 00002065 04967001 financial and insurance activities
         #data_from_db = list(mainCollection.find({"INDUSTRY_TYPE": "financial and insurance activities"},{"_id":0}))
-        #data_from_db = list(mainCollection.find({"REG": {"$in" :  ["00002065"]}},{"_id":0}))
-        data_from_db = list(mainCollection.find({"INDUSTRY_TYPE": industry},{"_id":0}))
+        data_from_db = list(mainCollection.find({"REG": {"$in" :  ["00002065"]}},{"_id":0}))
+        #data_from_db = list(mainCollection.find({"INDUSTRY_TYPE": industry},{"_id":0}))
         # queryData = list(data_from_db)
 
         if len(data_from_db) == 0:
@@ -144,6 +144,8 @@ if __name__ == "__main__":
             data['SIC07'].fillna('unknown', inplace=True)
         except:
             pass
+        
+        data["YEAR"] = data["YEAR"].astype(str).astype(int)
 
         # conditions0_at = [
         #     (data['INDUSTRY_TYPE'] == 'professional, scientific and technical activities'),
@@ -178,14 +180,14 @@ if __name__ == "__main__":
         data_cagr["YEAR"] = data_cagr["YEAR"].astype(str).astype(int)
         #data = data[data['YEAR'] != 2021]
         #data_cagr["RETAINED_PROFITS"] = data_cagr["RETAINED_PROFITS"].astype(float).astype(int)
-        data.head()
+        #data.head()
 
         # list_dataframes = []
-        # for k, v in data.groupby('NAME'):
-        #     if v.shape[0] >= 3:
+        # for k, v in data_cagr.groupby('NAME'):
+        #     if v.shape[0] > 1:
         #         list_dataframes.append(v)
         
-        list_dataframes = [v for k, v in data.groupby('NAME')]
+        list_dataframes = [v for k, v in data_cagr.groupby('NAME')]
         #print(list_dataframes)
         print("dataframe list ",len(list_dataframes))
         if len(list_dataframes) == 0:
@@ -412,7 +414,7 @@ if __name__ == "__main__":
         root_cagr = pd.merge(root_data_cagr,df, on=['REG','NAME','INDUSTRY_TYPE','YEAR','RETAINED_PROFITS','CAGR'],how ="outer")
 
         root_cagr.shape
-        #print(root_cagr)
+        print(root_cagr)
         iscores = root_cagr.to_dict('records')
 
         stage_5_table = dgsafe['final_cagr_scores']
@@ -420,11 +422,11 @@ if __name__ == "__main__":
         print("START INSERT DATA INTO COLLECTION" )
         
         
-        stage_5_table.insert_many(iscores)
+        #stage_5_table.insert_many(iscores)
 
         print("complete ind")
-    print("complete")   
-        #quit()              
+    #print("complete")   
+        quit()              
         # df_stats = df.describe()
 
         # df_stats.rename(columns = {"Unnamed: 0" : "Stats"}, inplace = True)
