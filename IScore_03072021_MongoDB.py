@@ -346,5 +346,5 @@ if __name__ == "__main__":
                 # list_dataframes[6].plot(kind='bar',x='industry_type',y='avg_EBITDA', color='red', ax=ax)
 
                 # plt.show()
-    quit()   
+        #quit()   
 
